@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aisle 10 · Inventory desk</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%23163042' width='32' height='32'/%3E%3Crect x='7' y='10' width='18' height='16' fill='%23efeae0'/%3E%3Crect x='7' y='18' width='18' height='8' fill='%23ff4b3e'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Literata:opsz,wght@7..72,500;7..72,650&display=swap" rel="stylesheet">
+<style>
+:root {
+  --wall: #163042;
+  --wall-2: #1e4258;
+  --paper: #f4efe4;
+  --carton: #efeae0;
+  --ink: #1c1915;
+  --muted: #c5d5e2;
+  --tomato: #ff4b3e;
+  --tomato-ink: #ffd2cc;
+  --amber: #ffb020;
+  --sea: #14b8a6;
+  --sea-ink: #b7f3ec;
+  --cobalt: #5b7cfa;
+  --guard: #f5c518;
+  --wood: #c9843f;
+  --wood-dark: #8a4e22;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: #f3f6f8;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  background:
+    radial-gradient(1100px 420px at 50% -8%, #2d5d78 0%, transparent 62%),
+    var(--wall);
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+h1, h2, .num { font-family: "Barlow Condensed", sans-serif; font-weight: 600; letter-spacing: 0; }
+h1 { font-size: clamp(52px, 8vw, 84px); line-height: 0.88; margin: 0; }
+h2 { font-size: 30px; line-height: 1; margin: 0; }
+.room { max-width: 1120px; margin: 0 auto; padding: 28px 20px 64px; }
+.top { display: grid; grid-template-columns: 1.4fr 0.7fr; gap: 28px; align-items: end; }
+.lede { font-family: Literata, Georgia, serif; font-size: 21px; line-height: 1.4; max-width: 38rem; margin: 14px 0 0; }
+.otb { text-align: right; }
+.otb .num { font-size: 46px; line-height: 0.9; display: block; }
+.otb .cap { color: var(--muted); display: block; margin-top: 4px; }
+.meter { margin-top: 10px; height: 10px; background: rgba(255,255,255,.14); }
+.meter span { display: block; height: 100%; background: var(--sea); }
+.meter.over span { background: var(--tomato); }
+.otb.over .num { color: var(--tomato-ink); }
+.rules { display: flex; flex-wrap: wrap; gap: 22px 32px; margin-top: 28px; align-items: end; }
+.rule p, .month-label { margin: 0 0 8px; color: var(--muted); }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+.seg button, .months button, .slip button, .stamps button, .stepper button, .md button, .play button, .ghost {
+  border: 1px solid rgba(255,255,255,.28);
+  background: transparent;
+  color: #f3f6f8;
+  border-radius: 2px;
+  min-height: 40px;
+  padding: 6px 10px;
+}
+.seg button { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15; }
+.seg button small { font-size: 12px; color: var(--muted); font-weight: 500; }
+.seg button[aria-pressed="true"], .months button[aria-pressed="true"], .slip button[aria-pressed="true"] {
+  background: var(--guard);
+  color: var(--ink);
+  border-color: var(--guard);
+}
+.seg button[aria-pressed="true"] small { color: #5c4b10; }
+.months { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; }
+.months button { min-width: 48px; }
+.pace { font-family: Literata, Georgia, serif; font-size: 18px; max-width: 46rem; margin: 12px 0 0; }
+.shelf { margin-top: 26px; }
+.shelf h2 span { color: var(--muted); font-size: 20px; margin-left: 8px; }
+.bins { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 12px; align-items: end; }
+.bin {
+  appearance: none;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  border-radius: 2px;
+}
+.bin:hover .carton { transform: translateY(-3px); }
+.bin[aria-pressed="true"] .carton { outline: 3px solid var(--guard); outline-offset: 3px; }
+.days { display: flex; gap: 8px; align-items: baseline; margin-bottom: 6px; font-family: "Barlow Condensed", sans-serif; font-size: 22px; }
+.days em { font-style: normal; font-family: Barlow, sans-serif; font-size: 13px; font-weight: 600; }
+.carton {
+  display: block;
+  height: 132px;
+  background: var(--carton);
+  position: relative;
+  overflow: hidden;
+  border-bottom: 8px solid var(--wood);
+  transition: transform .18s ease;
+}
+.fill { position: absolute; left: 0; right: 0; bottom: 0; transition: height .25s ease, background .25s ease; }
+.notch { position: absolute; left: 0; right: 0; height: 0; border-top: 3px solid var(--guard); }
+.tone-short .fill { background: var(--tomato); }
+.tone-tight .fill { background: var(--amber); }
+.tone-ok .fill { background: var(--sea); }
+.tone-heavy .fill { background: var(--cobalt); }
+.tone-out .fill { background: transparent; }
+.tone-out .carton { background: repeating-linear-gradient(-45deg, #3a2230, #3a2230 6px, #4a2a38 6px 12px); }
+.tone-short .days em { color: #ffb2aa; }
+.tone-tight .days em { color: var(--amber); }
+.tone-ok .days em { color: var(--sea-ink); }
+.tone-heavy .days em { color: #d5defe; }
+.tone-out .days em { color: var(--tomato-ink); }
+.nm { display: block; margin-top: 8px; font-weight: 600; }
+.pk { display: block; color: var(--muted); font-size: 14px; }
+.tape { height: 8px; margin-top: 12px; }
+.tape.short { background: repeating-linear-gradient(90deg, var(--tomato) 0 16px, var(--amber) 16px 32px); }
+.tape.heavy { background: repeating-linear-gradient(90deg, var(--cobalt) 0 16px, #163042 16px 20px, var(--sea) 20px 36px, #163042 36px 40px); }
+.empty-shelf { color: var(--muted); margin: 12px 0 0; }
+.how { color: var(--muted); margin: 8px 0 0; max-width: 46rem; }
+.belt-wrap { margin-top: 28px; }
+.belt-head { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); }
+.belt {
+  position: relative;
+  height: 92px;
+  margin-top: 8px;
+  background: repeating-linear-gradient(90deg, #2a241e 0 18px, #3a3128 18px 36px);
+  border-top: 4px solid #1a120e;
+  border-bottom: 4px solid #1a120e;
+}
+.door, .supplier { position: absolute; top: 6px; font-size: 12px; color: #ecd8b8; }
+.door { left: 8px; }
+.supplier { right: 8px; }
+.crate {
+  position: absolute;
+  top: 28px;
+  width: 168px;
+  min-height: 48px;
+  padding: 6px 8px;
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 2px;
+  box-shadow: 4px 4px 0 rgba(0,0,0,.35);
+  transition: left .35s ease, opacity .35s ease;
+}
+.crate b, .crate span { display: block; font-size: 13px; }
+.crate b { font-size: 14px; }
+.crate button {
+  margin-top: 4px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 2px;
+  padding: 3px 6px;
+  min-height: 28px;
+}
+.crate.stopped { opacity: .55; background: #d9d3c8; }
+.crate.stopped b { text-decoration: line-through; }
+.desk {
+  position: relative;
+  margin-top: 36px;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 26px 22px 22px;
+  box-shadow: 8px 10px 0 rgba(0,0,0,.28);
+}
+.desk::before {
+  content: "";
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  width: 92px;
+  height: 22px;
+  transform: translateX(-50%);
+  background: linear-gradient(#eef2f6, #c5ced8);
+  border-radius: 3px;
+  box-shadow: inset 0 -3px 0 #aeb8c4;
+}
+.desk-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 26px; }
+.story { font-family: Literata, Georgia, serif; font-size: 22px; line-height: 1.35; margin: 8px 0 12px; }
+.verdict { margin: 0; }
+.verdict li { margin: 0 0 6px; }
+.stamp {
+  display: inline-block;
+  margin: 8px 0 0;
+  border: 3px solid #0f766e;
+  color: #0f766e;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 22px;
+  padding: 1px 8px;
+  transform: rotate(-5deg);
+}
+.stamp.no { border-color: #c4232a; color: #c4232a; }
+.facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.facts div { border-top: 2px solid var(--ink); padding-top: 6px; }
+.facts b { display: block; font-family: "Barlow Condensed", sans-serif; font-size: 28px; font-weight: 600; line-height: 1; }
+.facts span { font-size: 13px; }
+.slip-line { margin: 0 0 8px; }
+.stepper, .stamps, .md, .play { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.desk button, .desk .ghost {
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 2px;
+  min-height: 40px;
+  padding: 6px 10px;
+}
+.desk .primary { background: var(--ink); color: var(--paper); }
+.why { font-size: 14.5px; margin: 8px 0; }
+.bars { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.bar-label { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.track { height: 14px; background: #e4dccb; }
+.track i { display: block; height: 100%; }
+.track.cash i { background: var(--cobalt); }
+.track.loss i { background: var(--tomato); }
+.compare { font-family: Literata, Georgia, serif; font-size: 17px; line-height: 1.4; margin: 12px 0 0; }
+svg.spark { width: 100%; height: auto; display: block; background: #e7e0d2; margin-top: 8px; }
+svg.spark polyline { fill: none; stroke: var(--ink); stroke-width: 2.5; }
+svg.spark circle { fill: var(--guard); stroke: var(--ink); }
+.note { margin: 8px 0; }
+.foot { margin-top: 22px; color: var(--muted); font-size: 14px; }
+.foot summary { cursor: pointer; color: #f3f6f8; }
+.foot p { max-width: 62rem; }
+.sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+:focus-visible { outline: 3px solid var(--guard); outline-offset: 3px; }
+@media (max-width: 860px) {
+  .top, .desk-grid { grid-template-columns: 1fr; }
+  .otb { text-align: left; }
+  .bins { grid-template-columns: repeat(2, 1fr); }
+  .facts { grid-template-columns: 1fr; }
+  .crate { width: 140px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .fill, .bin:hover .carton, .crate { transition: none; }
+}
+</style>
+</head>
+<body>
+<main class="room" id="app"></main>
+<p id="live" class="sr" aria-live="polite"></p>
+<script>
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MONTH_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const BUDGET = 950000;
+const ZMAP = { "90": 1.28, "95": 1.65, "98": 2.05 };
+const REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const SKUS = [
+  { id:"oil", name:"Sunflower oil", pack:"1 litre", lead:9, onHand:1680, cost:118, price:156,
+    daily:[200,190,200,210,220,230,240,250,280,330,360,240],
+    swing:[30,28,30,32,34,36,38,40,45,52,58,38] },
+  { id:"rice", name:"Basmati rice", pack:"5 kg", lead:8, onHand:740, cost:305, price:419,
+    daily:[150,140,145,150,155,160,165,170,175,190,220,170],
+    swing:[20,18,18,20,22,22,24,24,26,30,36,24] },
+  { id:"lights", name:"Fairy lights", pack:"10 metre", lead:16, onHand:460, cost:165, price:299,
+    daily:[15,12,10,8,10,14,20,35,80,210,280,70],
+    swing:[6,5,4,3,4,6,8,14,28,48,60,22] },
+  { id:"milk", name:"UHT milk", pack:"1 litre", lead:2, onHand:640, cost:44, price:62,
+    daily:[470,460,465,470,475,480,485,480,475,480,490,500],
+    swing:[42,40,40,42,42,44,44,44,42,42,44,46] },
+  { id:"heat", name:"Room heater", pack:"2000 W", lead:20, onHand:860, cost:2140, price:3499,
+    daily:[55,30,10,3,1,1,1,1,2,3,6,28],
+    swing:[12,8,3,1,1,1,1,1,1,1,2,7] },
+  { id:"coat", name:"Raincoat", pack:"adult", lead:18, onHand:1240, cost:380, price:699,
+    daily:[8,10,20,40,90,140,100,35,15,8,6,6],
+    swing:[3,3,6,12,22,30,24,10,5,3,2,2] },
+  { id:"mug", name:"Mug set", pack:"set of 2", lead:25, onHand:980, cost:220, price:449,
+    daily:[16,14,12,12,12,14,16,16,14,12,14,22],
+    swing:[4,3,3,3,3,3,4,4,3,3,3,5] },
+  { id:"mat", name:"Yoga mat", pack:"6 mm", lead:30, onHand:540, cost:510, price:899,
+    daily:[28,16,8,5,4,4,5,6,6,5,6,18],
+    swing:[6,4,2,2,1,1,2,2,2,2,2,4] }
+];
+
+const POS = [
+  { id:"po-milk", sku:"milk", qty:900, day:2, stoppable:false },
+  { id:"po-coat", sku:"coat", qty:400, day:12, stoppable:true }
+];
+
+const state = {
+  month: 9,
+  promise: "95",
+  slip: 0,
+  selected: "lights",
+  orders: {},
+  expedite: {},
+  cancelled: {},
+  markdown: { heat:30, coat:30, mug:20, mat:20 },
+  week: 0,
+  timer: null
+};
+
+function skuById(id) { return SKUS.find(s => s.id === id); }
+function inr(n) {
+  const v = Math.round(n);
+  return (v < 0 ? "-" : "") + "₹" + Math.abs(v).toLocaleString("en-IN");
+}
+function units(n) { return Math.round(n).toLocaleString("en-IN"); }
+function daysLabel(n) {
+  if (!isFinite(n)) return "n/a";
+  if (n >= 10) return Math.round(n) + " days";
+  const t = Math.round(n * 10) / 10;
+  return t.toFixed(1).replace(/\.0$/, "") + " days";
+}
+function listNames(names) {
+  if (names.length < 2) return names[0] || "";
+  if (names.length === 2) return names[0] + " and " + names[1];
+  return names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
+}
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+}
+function leadDays(sku) {
+  if (state.expedite[sku.id]) return Math.max(2, Math.round(sku.lead * 0.35) + state.slip);
+  return sku.lead + state.slip;
+}
+function unitCost(sku) {
+  return state.expedite[sku.id] ? Math.round(sku.cost * 1.15) : sku.cost;
+}
+function inboundList(sku) {
+  return POS.filter(po => po.sku === sku.id && !state.cancelled[po.id]).map(po => ({
+    id: po.id, qty: po.qty, stoppable: po.stoppable, arrive: po.day + state.slip
+  }));
+}
+function inboundQty(sku) {
+  return inboundList(sku).reduce((sum, po) => sum + po.qty, 0);
+}
+function simulate(sku, days, orderQty) {
+  const d = sku.daily[state.month];
+  const arrive = leadDays(sku);
+  const receipts = {};
+  inboundList(sku).forEach(po => { receipts[po.arrive] = (receipts[po.arrive] || 0) + po.qty; });
+  let oh = sku.onHand;
+  let lost = 0;
+  const weeks = [{ day: 0, oh, lost: 0 }];
+  for (let day = 1; day <= days; day++) {
+    let rec = receipts[day] || 0;
+    if (orderQty && day === arrive) rec += orderQty;
+    oh += rec;
+    if (oh >= d) oh -= d;
+    else { lost += d - oh; oh = 0; }
+    if (day % 7 === 0) weeks.push({ day, oh, lost });
+  }
+  return { oh, lost, weeks };
+}
+function core(sku) {
+  const d = sku.daily[state.month];
+  const swing = sku.swing[state.month];
+  const L = leadDays(sku);
+  const ss = state.z() * swing * Math.sqrt(Math.max(L, 1));
+  const inbound = inboundQty(sku);
+  const need = d * L + ss + d * 7;
+  const suggest = Math.max(0, Math.round((need - sku.onHand - inbound) / 10) * 10);
+  const extraUnits = Math.max(0, sku.onHand - need);
+  return {
+    d, swing, L, ss, inbound, need,
+    targetDays: need / d,
+    coverDays: sku.onHand / d,
+    suggest, extraUnits,
+    margin: sku.price - sku.cost
+  };
+}
+state.z = function () { return ZMAP[state.promise]; };
+function plan(sku) {
+  const c = core(sku);
+  const placed = state.orders[sku.id] || 0;
+  const pre = simulate(sku, Math.max(c.L - 1, 0), 0);
+  const sim = simulate(sku, 56, placed);
+  const blank = simulate(sku, 56, 0);
+  const played = state.week === 0 ? sku.onHand : simulate(sku, state.week * 7, placed).oh;
+  return {
+    ...c, placed, pre, sim, blank, played,
+    orderCost: placed * unitCost(sku),
+    extraCost: c.extraUnits * sku.cost
+  };
+}
+function stepFor(sku) {
+  const d = sku.daily[state.month];
+  if (d >= 200) return 100;
+  if (d >= 40) return 20;
+  return 10;
+}
+function aisle() {
+  const rows = SKUS.map(sku => ({ sku, p: plan(sku) }));
+  const cash = rows.reduce((sum, r) => sum + r.p.extraCost, 0);
+  const lostBlank = rows.reduce((sum, r) => sum + r.p.blank.lost * r.p.margin, 0);
+  const lostNow = rows.reduce((sum, r) => sum + r.p.sim.lost * r.p.margin, 0);
+  const spend = rows.reduce((sum, r) => sum + r.p.orderCost, 0);
+  return { rows, cash, lostBlank, lostNow, spend, saved: lostBlank - lostNow };
+}
+function fitBudget() {
+  const ranked = SKUS.map(sku => {
+    const c = core(sku);
+    if (c.suggest <= 0) return null;
+    const cost = unitCost(sku);
+    const gain = (simulate(sku, 56, 0).lost - simulate(sku, 56, c.suggest).lost) * c.margin;
+    const weekQty = Math.min(c.suggest, Math.max(10, Math.round(c.d * 7 / 10) * 10));
+    return { id: sku.id, sug: c.suggest, cost, ratio: gain / (c.suggest * cost), weekQty };
+  }).filter(Boolean).sort((a, b) => b.ratio - a.ratio);
+  const next = {};
+  SKUS.forEach(s => { next[s.id] = 0; });
+  let left = BUDGET;
+  function give(row, want) {
+    const room = Math.max(0, want - next[row.id]);
+    const affordable = Math.floor(left / row.cost / 10) * 10;
+    const qty = Math.min(room, Math.max(0, affordable));
+    if (qty <= 0) return;
+    next[row.id] += qty;
+    left -= qty * row.cost;
+  }
+  ranked.forEach(row => give(row, row.weekQty));
+  ranked.forEach(row => give(row, row.sug));
+  state.orders = next;
+}
+function fillFormula() {
+  const next = {};
+  SKUS.forEach(sku => { next[sku.id] = core(sku).suggest; });
+  state.orders = next;
+}
+function clearOrders() {
+  const next = {};
+  SKUS.forEach(sku => { next[sku.id] = 0; });
+  state.orders = next;
+}
+function stopPlay() {
+  if (state.timer) clearInterval(state.timer);
+  state.timer = null;
+}
+function toneOf(daysOnHand, p) {
+  if (daysOnHand <= 0) return "out";
+  if (daysOnHand < p.L) return "short";
+  if (daysOnHand < p.targetDays) return "tight";
+  if (daysOnHand > p.targetDays * 1.8) return "heavy";
+  return "ok";
+}
+function toneWord(tone) {
+  return { out:"Out", short:"Short", tight:"Tight", ok:"Sound", heavy:"Heavy" }[tone];
+}
+function paceLine() {
+  const ranked = SKUS.map(s => ({ name: s.name, d: s.daily[state.month] })).sort((a, b) => b.d - a.d);
+  let line = MONTHS[state.month] + " pace: " + ranked[0].name + " sells about " + units(ranked[0].d) + " a day. " + ranked[ranked.length - 1].name + " sells about " + units(ranked[ranked.length - 1].d) + ".";
+  if (state.month === 9) line += " Try June, then January. The cartons change shelves.";
+  return line;
+}
+function story(sku, p) {
+  let line;
+  if (p.coverDays + 0.05 < p.L) {
+    line = sku.name + " is down to " + daysLabel(p.coverDays) + " of cover. The truck is " + Math.round(p.L) + " days out. A larger order does not arrive any sooner.";
+  } else if (p.extraUnits > p.d * 14) {
+    line = sku.name + " has " + daysLabel(p.coverDays) + " on the shelf. The cover you need is " + daysLabel(p.targetDays) + ". Anything above that is cash you cannot spend on the short shelf.";
+  } else {
+    line = sku.name + " sits near the cover you need: " + daysLabel(p.coverDays) + " on hand, against " + daysLabel(p.targetDays) + " for this promise.";
+  }
+  if (p.inbound > 0) line += " " + units(p.inbound) + " units are already on the way.";
+  return line;
+}
+function compareLine(a) {
+  if (a.cash > a.lostBlank * 1.15) {
+    return "Unsold stock ties up " + inr(a.cash) + ", more than the " + inr(a.lostBlank) + " of margin eight weeks of stockouts would cost at this pace. The empty cartons are urgent. The bottom shelf is where the money is stuck.";
+  }
+  if (a.lostBlank > a.cash * 1.15) {
+    return "If the slips stay blank, eight weeks at this pace gives up " + inr(a.lostBlank) + " of margin. That is more than the " + inr(a.cash) + " sitting in extra stock. Buy cover first, and still do not feed the bottom shelf.";
+  }
+  return "Extra stock (" + inr(a.cash) + ") and eight weeks of missed margin (" + inr(a.lostBlank) + ") are in the same range. The week has to do both jobs.";
+}
+function verdictLines(a) {
+  const short = a.rows.filter(r => r.p.coverDays < r.p.L).map(r => r.sku.name);
+  const heavy = a.rows.filter(r => r.p.extraCost > 100000).sort((x, y) => y.p.extraCost - x.p.extraCost);
+  const lines = [];
+  if (short.length) lines.push(listNames(short) + (short.length === 1 ? " runs out before the truck arrives." : " run out before the trucks arrive."));
+  else lines.push("At this month's pace, nothing runs out inside its lead time.");
+  if (heavy.length) lines.push(heavy[0].sku.name + " is the heavy pile, " + inr(heavy[0].p.extraCost) + " above the cover you need.");
+  if (a.spend > BUDGET) lines.push("The slips total " + inr(a.spend) + ", which is " + inr(a.spend - BUDGET) + " over the open-to-buy.");
+  else lines.push("The slips spend " + inr(a.spend) + " and leave " + inr(BUDGET - a.spend) + ". Over eight weeks they protect " + inr(Math.max(0, a.saved)) + " of margin.");
+  return lines;
+}
+function playLine(a) {
+  if (state.week === 0) return "Today. Play eight weeks at this month's daily pace, with the slips as they stand.";
+  let worst = null;
+  let total = 0;
+  a.rows.forEach(r => {
+    const sim = simulate(r.sku, state.week * 7, r.p.placed);
+    total += sim.lost;
+    if (!worst || sim.lost > worst.lost) worst = { name: r.sku.name, lost: sim.lost };
+  });
+  return "Week " + state.week + ". Missed sales so far: " + units(total) + " units. " + worst.name + " accounts for " + units(worst.lost) + " of them.";
+}
+function markdownPlan(sku, p) {
+  const m = state.markdown[sku.id] ?? 20;
+  const lift = 1 + (m / 10) * 0.45;
+  const cleared = Math.min(p.extraUnits, p.d * 28 * lift);
+  return {
+    m, cleared,
+    released: cleared * sku.cost,
+    givenUp: cleared * sku.price * (m / 100)
+  };
+}
+function spark(sku, placed) {
+  const weeks = simulate(sku, 56, placed).weeks;
+  const max = Math.max.apply(null, weeks.map(w => w.oh).concat([1]));
+  const pts = weeks.map((w, i) => {
+    const x = 10 + (i / (weeks.length - 1)) * 280;
+    const y = 86 - (w.oh / max) * 70;
+    return { x, y, w };
+  });
+  const cursor = pts[Math.min(state.week, pts.length - 1)];
+  const poly = pts.map(p => p.x.toFixed(1) + "," + p.y.toFixed(1)).join(" ");
+  return '<svg class="spark" viewBox="0 0 300 100" role="img" aria-label="On-hand units over eight weeks">' +
+    '<polyline points="' + poly + '"/>' +
+    '<circle cx="' + cursor.x.toFixed(1) + '" cy="' + cursor.y.toFixed(1) + '" r="4.5"/>' +
+    "</svg>";
+}
+function binButton(row) {
+  const sku = row.sku;
+  const p = row.p;
+  const shownDays = p.played / p.d;
+  const tone = toneOf(shownDays, p);
+  const fill = shownDays <= 0 ? 0 : Math.max(8, Math.min(100, shownDays / 45 * 100));
+  const notch = Math.max(0, Math.min(100, p.targetDays / 45 * 100));
+  const pressed = sku.id === state.selected ? "true" : "false";
+  return '<button class="bin tone-' + tone + '" id="bin-' + sku.id + '" data-act="pick" data-id="' + sku.id + '" aria-pressed="' + pressed + '">' +
+    '<span class="days"><b>' + esc(p.played <= 0 ? "Out" : daysLabel(shownDays)) + '</b><em>' + toneWord(tone) + "</em></span>" +
+    '<span class="carton"><span class="fill" style="height:' + fill.toFixed(1) + '%"></span>' +
+    '<span class="notch" style="bottom:' + notch.toFixed(1) + '%" title="Cover you need"></span></span>' +
+    '<span class="nm">' + esc(sku.name) + '</span><span class="pk">' + esc(sku.pack) + "</span></button>";
+}
+function poBlock(sku) {
+  const related = POS.filter(po => po.sku === sku.id);
+  if (!related.length) return "";
+  return related.map(po => {
+    const day = po.day + state.slip;
+    const stopped = !!state.cancelled[po.id];
+    if (!po.stoppable) {
+      return "<p class=\"note\">" + units(po.qty) + " units arrive on day " + day + ". That truck is already too close to turn around.</p>";
+    }
+    if (stopped) {
+      return "<p class=\"note\">That delivery is stopped. " + units(po.qty) + " units, " + inr(po.qty * sku.cost) + ", will not land.</p>" +
+        '<button id="po-' + po.id + '" data-act="po" data-id="' + po.id + '">Put the delivery back</button>';
+    }
+    return "<p class=\"note\">A truck with " + units(po.qty) + " units arrives on day " + day + ". Stopping it keeps " + inr(po.qty * sku.cost) + " off this shelf.</p>" +
+      '<button id="po-' + po.id + '" data-act="po" data-id="' + po.id + '">Stop this delivery</button>';
+  }).join("");
+}
+function render(focusId) {
+  const a = aisle();
+  const lines = verdictLines(a);
+  const spendPct = Math.min(100, a.spend / BUDGET * 100);
+  const over = a.spend > BUDGET;
+  const shortRows = a.rows.filter(r => r.p.coverDays < r.p.targetDays);
+  const heavyRows = a.rows.filter(r => r.p.coverDays >= r.p.targetDays);
+  const selected = skuById(state.selected);
+  const sp = plan(selected);
+  const md = markdownPlan(selected, sp);
+  const fastLead = Math.max(2, Math.round(selected.lead * 0.35) + state.slip);
+  const showFast = sp.suggest > 0 && (selected.lead + state.slip) - fastLead >= 2;
+  const left = BUDGET - a.spend;
+  const maxBar = Math.max(a.cash, a.lostNow, a.lostBlank, 1);
+
+  const promiseBtns = ["90","95","98"].map(key => {
+    const label = key === "90" ? "9 in 10" : key === "95" ? "19 in 20" : "Almost always";
+    return '<button id="promise-' + key + '" data-act="promise" data-p="' + key + '" aria-pressed="' + (state.promise === key ? "true" : "false") + '">' +
+      label + "<small>" + key + "% promise</small></button>";
+  }).join("");
+
+  const monthBtns = MONTH_SHORT.map((name, i) =>
+    '<button id="mon-' + i + '" data-act="month" data-m="' + i + '" aria-pressed="' + (state.month === i ? "true" : "false") + '">' + name + "</button>"
+  ).join("");
+
+  const shelf = (title, rows, tape) => {
+    const body = rows.length
+      ? '<div class="bins">' + rows.map(binButton).join("") + "</div>"
+      : '<p class="empty-shelf">Nothing on this shelf at this pace.</p>';
+    return '<section class="shelf"><h2>' + title + ' <span>' + rows.length + (rows.length === 1 ? " item" : " items") + "</span></h2>" +
+      body + '<div class="tape ' + tape + '"></div></section>';
+  };
+
+  const crates = POS.map(po => {
+    const sku = skuById(po.sku);
+    const day = po.day + state.slip;
+    const stopped = !!state.cancelled[po.id];
+    const leftPos = Math.min(72, 6 + (day / 28) * 66);
+    const action = po.stoppable
+      ? '<button id="crate-' + po.id + '" data-act="po" data-id="' + po.id + '">' + (stopped ? "Put it back" : "Stop it") + "</button>"
+      : "<span>Too close to stop</span>";
+    return '<div class="crate' + (stopped ? " stopped" : "") + '" style="left:' + leftPos.toFixed(1) + '%">' +
+      "<b>" + esc(sku.name) + "</b><span>" + units(po.qty) + " · day " + day + "</span>" + action + "</div>";
+  }).join("");
+
+  const mdBlock = sp.extraUnits > 0
+    ? '<p class="why">Extra on the shelf: ' + units(sp.extraUnits) + " units, " + inr(sp.extraCost) + " at cost. A markdown is a guess: each extra 10% off is assumed to lift weekly sales about 45%.</p>" +
+      '<div class="md">' + [0,10,20,30,40,50].map(n =>
+        '<button id="md-' + n + '" data-act="md" data-m="' + n + '" aria-pressed="' + (md.m === n ? "true" : "false") + '">' + n + "% off</button>"
+      ).join("") + "</div>" +
+      "<p class=\"why\">At " + md.m + "% off, about " + units(md.cleared) + " extra units clear in four weeks. That releases " + inr(md.released) + " of cost and gives up " + inr(md.givenUp) + " of price.</p>"
+    : "";
+
+  const fastBlock = showFast
+    ? '<button id="act-fast" data-act="expedite" aria-pressed="' + (state.expedite[selected.id] ? "true" : "false") + '">' +
+      (state.expedite[selected.id]
+        ? "Faster truck is on, day " + Math.round(sp.L) + ". Back to the normal truck"
+        : "Pay for a faster truck, day " + fastLead + " instead of day " + (selected.lead + state.slip)) +
+      "</button><p class=\"why\">The faster truck costs 15% more per unit on this new slip. It does not speed up trucks already on the belt.</p>"
+    : "";
+
+  document.getElementById("app").innerHTML =
+    '<header class="top"><div><h1>Aisle 10</h1>' +
+    '<p class="lede">Arka Retail, 28 stores, the week of 26 October 2026. The festival peak is in the first half of November. This aisle is holding the wrong goods.</p></div>' +
+    '<div class="otb' + (over ? " over" : "") + '"><span class="num">' + inr(Math.abs(left)) + '</span>' +
+    '<span class="cap">' + (over ? "over the " + inr(BUDGET) + " open-to-buy" : "left of the " + inr(BUDGET) + " open-to-buy") + "</span>" +
+    '<div class="meter' + (over ? " over" : "") + '" role="meter" aria-valuemin="0" aria-valuemax="' + BUDGET + '" aria-valuenow="' + Math.round(a.spend) + '" aria-label="Open-to-buy used"><span style="width:' + spendPct.toFixed(1) + '%"></span></div></div></header>' +
+    '<div class="rules"><div class="rule"><p>Promise to the customer</p><div class="seg">' + promiseBtns + '</div></div>' +
+    '<div class="rule"><p>Trucks already coming, and the next one</p><div class="seg slip">' +
+    '<button id="slip-0" data-act="slip" data-d="0" aria-pressed="' + (state.slip === 0 ? "true" : "false") + '">On time</button>' +
+    '<button id="slip-5" data-act="slip" data-d="5" aria-pressed="' + (state.slip === 5 ? "true" : "false") + '">Five days late</button>' +
+    "</div></div></div>" +
+    '<div class="months" role="group" aria-label="Month you are buying for">' + monthBtns + "</div>" +
+    '<p class="pace">' + esc(paceLine()) + "</p>" +
+    shelf("Shorter than the promise", shortRows, "short") +
+    shelf("Longer than the promise", heavyRows, "heavy") +
+    '<p class="how">The yellow line is the cover you need: lead time, seven days until you can order again, and safety stock. Colour is how full the carton is. Short means it runs out before the truck. Heavy means it holds more than you need.</p>' +
+    '<div class="belt-wrap"><div class="belt-head"><h2>On the road</h2><span>Receiving is on the left. A late network pushes every crate right.</span></div>' +
+    '<div class="belt"><span class="door">Receiving</span><span class="supplier">Supplier</span>' + crates + "</div></div>" +
+    '<section class="desk" id="desk"><div class="desk-grid"><div>' +
+    "<h2>" + esc(selected.name) + "</h2>" +
+    (state.week > 0 ? '<p class="why">Cartons are showing week ' + state.week + ". The buy math below is still about today.</p>" : "") +
+    '<p class="story">' + esc(story(selected, sp)) + "</p>" +
+    '<div class="facts"><div><b>' + units(selected.onHand) + '</b><span>on the shelf now</span></div>' +
+    "<div><b>" + units(sp.d) + '</b><span>selling per day</span></div>' +
+    "<div><b>day " + Math.round(sp.L) + "</b><span>this slip would land</span></div></div>" +
+    '<p class="slip-line">The formula wants <b>' + units(sp.suggest) + "</b> units. This slip buys <b>" + units(sp.placed) + "</b>, at " + inr(unitCost(selected)) + " each, " + inr(sp.orderCost) + " in total.</p>" +
+    '<div class="stepper"><button id="bump-down" data-act="bump" data-dir="-1">Take ' + stepFor(selected) + " off</button>" +
+    '<button id="bump-up" data-act="bump" data-dir="1">Add ' + stepFor(selected) + "</button>" +
+    '<button id="bump-week" data-act="weekstock">Add one week of sales</button></div>' +
+    "<p class=\"why\">Before this slip can land, about " + units(sp.pre.lost) + " sales are already missed. Over eight weeks this slip misses " + units(sp.sim.lost) + " sales. A blank slip misses " + units(sp.blank.lost) + ".</p>" +
+    fastBlock + poBlock(selected) + mdBlock +
+    '<p class="why">Reorder point is ' + units(sp.d * sp.L + sp.ss) + " units: " + units(sp.d) + " a day for " + Math.round(sp.L) + " days, plus " + units(sp.ss) + " units of safety stock at a " + state.promise + "% promise. z is " + state.z().toFixed(2) + ".</p>" +
+    "</div><div>" +
+    '<ol class="verdict">' + lines.map(line => "<li>" + esc(line) + "</li>").join("") + "</ol>" +
+    '<p class="stamp ' + (over ? "no" : "") + '">' + (over ? "Over the open-to-buy" : "Fits the open-to-buy") + "</p>" +
+    '<div class="stamps"><button class="primary" id="act-fit" data-act="fit">Fit the open-to-buy</button>' +
+    '<button id="act-formula" data-act="formula">Order the full formula</button>' +
+    '<button id="act-clear" data-act="clear">Clear the slips</button></div>' +
+    '<div class="bars"><div><div class="bar-label"><span>Cash above the cover you need</span><b>' + inr(a.cash) + '</b></div><div class="track cash"><i style="width:' + (a.cash / maxBar * 100).toFixed(1) + '%"></i></div></div>' +
+    '<div><div class="bar-label"><span>Margin lost over eight weeks, with these slips</span><b>' + inr(a.lostNow) + '</b></div><div class="track loss"><i style="width:' + (a.lostNow / maxBar * 100).toFixed(1) + '%"></i></div></div></div>' +
+    '<p class="compare">' + esc(compareLine(a)) + "</p>" +
+    "<p class=\"why\">" + esc(playLine(a)) + "</p>" +
+    spark(selected, sp.placed) +
+    '<div class="play"><button id="act-play" data-act="play">' + (state.timer ? "Stop" : "Play eight weeks") + "</button>" +
+    '<button id="act-today" data-act="today">Back to today</button></div>' +
+    "</div></div></section>" +
+    '<footer class="foot"><details><summary>How these numbers are made</summary>' +
+    "<p>Arka Retail is a teaching case for the inventory brief, not a real chain and not a live stock extract. Demand, lead time, cost, and price are planning assumptions. The open-to-buy for this week is " + inr(BUDGET) + ".</p>" +
+    "<p>Cover you need = demand during lead time + safety stock + seven days of demand. Safety stock = z × daily swing × square root of lead time. z is 1.28, 1.65, or 2.05. The buy quantity is that cover, minus units on the shelf, minus trucks already coming, rounded to 10 units. Extra units are what is on the shelf above that cover, valued at unit cost. Inbound trucks are not treated as extra you can mark down.</p>" +
+    "<p>Fit the open-to-buy ranks a full formula order by the margin it saves over 56 days, per rupee of cost. It first tries to give each of those items about seven days of sales, then spends what is left toward the formula, so one item does not take the whole week before the others have had a turn. The eight-week run holds the chosen month's daily pace steady. A faster truck cuts that item's own lead time to about a third, with a floor of 2 days, and adds 15% to the unit cost of the new order. Five days late adds 5 days to every lead time and every truck already on the road. Each extra 10% markdown is assumed to lift that item's weekly sales by about 45%, and only extra units are cleared. Carrying cost is not charged day by day.</p>" +
+    "</details></footer>";
+
+  const live = lines.join(" ");
+  if (document.getElementById("live").textContent !== live) {
+    document.getElementById("live").textContent = live;
+  }
+  if (focusId) {
+    const el = document.getElementById(focusId);
+    if (el) el.focus();
+  }
+}
+
+function boot() {
+  state.orders = {};
+  fitBudget();
+  render();
+  document.body.addEventListener("click", onClick);
+  document.addEventListener("keydown", onKey);
+}
+
+function onKey(e) {
+  if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+  if (e.target && e.target.closest && e.target.closest("button") && e.target.dataset.act !== "pick") return;
+  const ids = Array.from(document.querySelectorAll("[data-act=pick]")).map(el => el.dataset.id);
+  let index = ids.indexOf(state.selected);
+  if (index < 0) index = 0;
+  index = e.key === "ArrowRight" ? Math.min(ids.length - 1, index + 1) : Math.max(0, index - 1);
+  state.selected = ids[index];
+  stopPlay();
+  render("bin-" + state.selected);
+  e.preventDefault();
+}
+
+function onClick(e) {
+  const b = e.target.closest("[data-act]");
+  if (!b) return;
+  const act = b.dataset.act;
+  if (act === "play") {
+    if (state.timer) { stopPlay(); render("act-play"); return; }
+    if (REDUCE) { state.week = 8; render("act-play"); return; }
+    state.timer = setInterval(() => {
+      state.week = Math.min(8, state.week + 1);
+      if (state.week >= 8) stopPlay();
+      render(state.timer ? null : "act-play");
+    }, 700);
+    render("act-play");
+    return;
+  }
+  stopPlay();
+  if (act === "pick") {
+    state.selected = b.dataset.id;
+    render("bin-" + state.selected);
+    const desk = document.getElementById("desk");
+    if (desk) desk.scrollIntoView({ behavior: REDUCE ? "auto" : "smooth", block: "nearest" });
+    return;
+  }
+  if (act === "today") { state.week = 0; render("act-today"); return; }
+  state.week = 0;
+  if (act === "month") state.month = Number(b.dataset.m);
+  if (act === "promise") state.promise = b.dataset.p;
+  if (act === "slip") state.slip = Number(b.dataset.d);
+  if (act === "fit") fitBudget();
+  if (act === "formula") fillFormula();
+  if (act === "clear") clearOrders();
+  if (act === "expedite") state.expedite[state.selected] = !state.expedite[state.selected];
+  if (act === "po") state.cancelled[b.dataset.id] = !state.cancelled[b.dataset.id];
+  if (act === "md") state.markdown[state.selected] = Number(b.dataset.m);
+  if (act === "bump") {
+    const sku = skuById(state.selected);
+    const step = stepFor(sku);
+    const cur = state.orders[sku.id] || 0;
+    state.orders[sku.id] = Math.max(0, Math.min(20000, cur + Number(b.dataset.dir) * step));
+  }
+  if (act === "weekstock") {
+    const sku = skuById(state.selected);
+    const add = Math.max(10, Math.round(sku.daily[state.month] * 7 / 10) * 10);
+    state.orders[sku.id] = Math.min(20000, (state.orders[sku.id] || 0) + add);
+  }
+  render(b.id);
+}
+
+boot();
+</script>
+</body>
+</html>
